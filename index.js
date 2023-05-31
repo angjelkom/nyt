@@ -28,6 +28,8 @@ const main = async () => {
         '-resize', '1440x2550',
         `./serve/images/nyt-${format}.jpg`,
     ]);
+
+    await fs.promises.copyFile(`./serve/images/nyt-${format}.jpg`, `./serve/images/nytfrontpage.jpg`);
 }
 
 
