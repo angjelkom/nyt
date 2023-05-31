@@ -1,5 +1,5 @@
 // index.js
-import fs from 'fs'
+import { createWriteStream, copyFile } from 'fs'
 import { finished } from 'stream/promises'
 import { Readable } from 'stream'
 import im from 'imagemagick'
@@ -11,13 +11,10 @@ const main = async () => {
     let format = date.toISOString().split('T')[0];
 
     const file = await fetch(`https://static01.nyt.com/images/${format.replace(/-/g, '/')}/nytfrontpage/scan.pdf`);
-    console.log('file', file);
 
-    const fileStream = fs.createWriteStream('/tmp/image.pdf', { flags: 'wx' });
+    const fileStream = createWriteStream('/tmp/image.pdf', { flags: 'wx' });
 
     await finished(Readable.fromWeb(file.body).pipe(fileStream));
-
-    console.log('yes');
 
     im.convert([
         '/tmp/image.pdf[0]',
@@ -27,9 +24,7 @@ const main = async () => {
         '-strip',
         '-resize', '1440x2550',
         `./serve/images/nyt-${format}.jpg`,
-    ]);
-
-    await fs.promises.copyFile(`./serve/images/nyt-${format}.jpg`, `./serve/images/nytfrontpage.jpg`);
+    ], () => copyFile(`./serve/images/nyt-${format}.jpg`, `./serve/images/nytfrontpage.jpg`, () => console.log('Generated New Front Page!')));
 }
 
 
